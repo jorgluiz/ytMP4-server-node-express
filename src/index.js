@@ -3,6 +3,7 @@ const app = express()
 const router = express.Router();
 const http = require('http');
 app.use(express.json()); // Middleware para análise de solicitações JSON
+const youtubedl = require("youtube-dl-exec"); // CommonJS
 const ytdl = require("@distube/ytdl-core"); // CommonJS
 const ffmpeg = require("fluent-ffmpeg");
 const cors = require('cors');
@@ -32,6 +33,7 @@ app.use(cors({
 // Defina o caminho para o binário do ffmpeg
 const ffmpegPath = process.env.FFMPEG_PATH || '/usr/bin/ffmpeg';
 ffmpeg.setFfmpegPath(ffmpegPath);
+// ffmpeg.setFfmpegPath(path.resolve("C:\\Users\\Dev\\Desktop\\ffmpeg-master-latest-win64-gpl-shared\\bin\\ffmpeg.exe"));
 
 app.post("/yt-video-formats", async (req, res) => {
   console.time("yt-video-formats"); // Inicia o cronômetro
@@ -105,51 +107,80 @@ const ytVideoAduioDownload = async (req, res, next) => {
     });
   }
 
-  if (!urlVideo || !ytdl.validateURL(urlVideo)) {
-    return res.status(400).json({ error: "URL de vídeo inválida ou não fornecida." });
-  }
+  // if (!urlVideo || !ytdl.validateURL(urlVideo)) {
+  //   return res.status(400).json({ error: "URL de vídeo inválida ou não fornecida." });
+  // }
 
   try {
-    const info = await ytdl.getInfo(urlVideo);
+    // const info = await ytdl.getInfo(urlVideo);
 
-    // Obtém os formatos de vídeo e áudio disponíveis
-    const videoFormats = ytdl.filterFormats(info.formats, "video");
-    const audioFormats = ytdl.filterFormats(info.formats, "audioonly");
+    // // Obtém os formatos de vídeo e áudio disponíveis
+    // const videoFormats = ytdl.filterFormats(info.formats, "video");
+    // const audioFormats = ytdl.filterFormats(info.formats, "audioonly");
 
-    if (videoFormats.length === 0 || audioFormats.length === 0) {
-      return res.status(404).json({ error: "Nenhum formato de vídeo ou áudio disponível." });
-    }
+    // if (videoFormats.length === 0 || audioFormats.length === 0) {
+    //   return res.status(404).json({ error: "Nenhum formato de vídeo ou áudio disponível." });
+    // }
 
-    const specificVideoFormat = videoFormats.find(
-      (format) => format.qualityLabel === qualityFormat) || ytdl.chooseFormat(videoFormats, { quality: "highestvideo" });
+    // const specificVideoFormat = videoFormats.find(
+    //   (format) => format.qualityLabel === qualityFormat) || ytdl.chooseFormat(videoFormats, { quality: "highestvideo" });
 
-    const bestAudioFormat = audioFormats[0];
+    // const bestAudioFormat = audioFormats[0];
 
-    const tempDir = path.resolve(__dirname, 'downloads'); // Diretório temporário
+    // const tempDir = path.resolve(__dirname, 'downloads'); // Diretório temporário
+    // if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
+    // const videoPath = path.resolve(tempDir, `video_${Date.now()}.mp4`);
+    // const audioPath = path.resolve(tempDir, `audio_${Date.now()}.mp3`);
+
+    // Diretório temporário
+    const tempDir = path.resolve(path.resolve(), 'src/downloads');
     if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
-    const videoPath = path.resolve(tempDir, `video_${Date.now()}.mp4`);
-    const audioPath = path.resolve(tempDir, `audio_${Date.now()}.mp3`);
+    const audioPath = path.resolve(tempDir, 'audio.mp3');
+    const videoPath = path.resolve(tempDir, 'video.f399.mp4');
+
+    await youtubedl(urlVideo, {
+      output: audioPath,
+      format: 'bestaudio'
+    }).then(() => {
+      console.log("Áudio baixado com sucesso:", audioPath);
+    }).catch(err => {
+      console.error("Erro ao baixar áudio:", err);
+      isProcessing = false; // Certifique-se de liberar o estado
+      throw err;
+    });
+
+    await youtubedl(urlVideo, {
+      output: videoPath,
+      format: 'bestvideo+bestaudio/best',
+      mergeOutputFormat: 'mp4',
+    }).then(() => {
+      console.log("Vídeo baixado com sucesso:", videoPath);
+    }).catch(err => {
+      console.error("Erro ao baixar vídeo:", err);
+      isProcessing = false;
+      throw err;
+    });
 
     // Função para baixar arquivos
-    const downloadFile = (url, format, outputPath) =>
-      new Promise((resolve, reject) => {
-        const stream = ytdl(url, { format });
-        const writeStream = fs.createWriteStream(outputPath);
-        stream.pipe(writeStream);
-        stream.on("end", resolve);
-        stream.on("error", reject);
-        writeStream.on("error", reject);
-      });
+    // const downloadFile = (url, format, outputPath) =>
+    //   new Promise((resolve, reject) => {
+    //     const stream = ytdl(url, { format });
+    //     const writeStream = fs.createWriteStream(outputPath);
+    //     stream.pipe(writeStream);
+    //     stream.on("end", resolve);
+    //     stream.on("error", reject);
+    //     writeStream.on("error", reject);
+    //   });
 
     isProcessing = true;
 
     // Aguarda os downloads de vídeo e áudio  
-    console.time("downloads de vídeo");
-    await downloadFile(urlVideo, specificVideoFormat, videoPath);
-    console.timeEnd("downloads de vídeo");
-    console.time("downloads de audio");
-    await downloadFile(urlVideo, bestAudioFormat, audioPath);
-    console.timeEnd("downloads de audio");
+    // console.time("downloads de vídeo");
+    // await downloadFile(urlVideo, specificVideoFormat, videoPath);
+    // console.timeEnd("downloads de vídeo");
+    // console.time("downloads de audio");
+    // await downloadFile(urlVideo, bestAudioFormat, audioPath);
+    // console.timeEnd("downloads de audio");
 
     req.videoPath = videoPath;  // Armazenando o caminho do vídeo no req
     req.audioPath = audioPath;  // Armazenando o caminho do áudio no req
@@ -168,7 +199,7 @@ const toCombineVideoAudio = async (req, res) => {
   const { videoPath, audioPath, clientId } = req; // Pegando os caminhos do vídeo e áudio de req
 
   const tempDir = path.resolve(__dirname, 'downloads'); // Diretório temporário
-  const outputPath = path.resolve(tempDir, `output_${Date.now()}.mp4`);
+  const outputPath = path.resolve(tempDir, `output.mp4`);
 
   console.time("Verificação de arquivos");
   try {
