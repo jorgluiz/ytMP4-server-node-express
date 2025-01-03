@@ -10,6 +10,7 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require("uuid"); // Para gerar identificadores únicos
 const { PassThrough } = require('stream');
+require('dotenv').config();
 
 const server = http.createServer(app);
 
@@ -29,7 +30,8 @@ app.use(cors({
 
 
 // Defina o caminho para o binário do ffmpeg
-ffmpeg.setFfmpegPath("/usr/bin/ffmpeg"); // Caminho do binário no Linux/Docker
+const ffmpegPath = process.env.FFMPEG_PATH || '/usr/bin/ffmpeg';
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 app.post("/yt-video-formats", async (req, res) => {
   console.time("yt-video-formats"); // Inicia o cronômetro
