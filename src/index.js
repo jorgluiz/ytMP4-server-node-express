@@ -17,7 +17,7 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server, {
   cors: {
-    origin: ['https://strongly-singular-moray.ngrok-free.app', 'http://localhost:8080'], // Permite qualquer origem (ajuste conforme necessário)
+    origin: ['https://ytmp4-server-node-express-production.up.railway.app', 'http://localhost:8080'], // Permite qualquer origem (ajuste conforme necessário)
     methods: ['GET', 'POST']
   }
 });
