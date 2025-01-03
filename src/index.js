@@ -19,14 +19,15 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server, {
   cors: {
-    origin: ['https://ytmp4-server-node-express-production.up.railway.app', 'http://localhost:8080'], // Permite qualquer origem (ajuste conforme necessário)
+    origin: ['https://ytmp4-server-node-express-production.up.railway.app', 'http://localhost:8080', 'https://web-production-9f85.up.railway.app/'], // Permite qualquer origem (ajuste conforme necessário)
     methods: ['GET', 'POST']
   }
 });
 
 // Configura o CORS para aceitar requisições de uma origem específica
 app.use(cors({
-  origin: '*', // Permitir todas as origens (ou especifique a sua)
+  origin: ['https://web-production-9f85.up.railway.app', 'http://localhost:8080'],
+  methods: ['GET', 'POST']
 }));
 
 
