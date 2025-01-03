@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@distube/ytdl-core@^4.15.7":
+"@distube/ytdl-core@^4.15.8":
   version "4.15.8"
   resolved "https://registry.yarnpkg.com/@distube/ytdl-core/-/ytdl-core-4.15.8.tgz#3516a1b80eba05d6c24ddd9df427ee9a816b9da4"
   integrity sha512-yuQr8KDKuusXmaNNAw+stsRu6nmJUPy9hL6IgPm/8ei1zixfQFZpAIflXsqDrdXIaSp4hzTmQ1Z0KYhuqF2/JQ==
