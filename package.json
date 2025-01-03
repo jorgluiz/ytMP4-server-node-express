@@ -1,0 +1,21 @@
+{ 
+"name": "ytMP4-server-node-express",
+"version": "1.0.0",
+"main": "index.js",
+"license": "MIT",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@distube/ytdl-core": "^4.15.7",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "fluent-ffmpeg": "^2.1.3",
+    "path": "^0.12.7",
+    "socket.io": "^4.8.1",
+    "stream": "^0.0.3",
+    "uuid": "^11.0.3",
+    "ytdl-core": "^4.11.5"
+  }
+}
