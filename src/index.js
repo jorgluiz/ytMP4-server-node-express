@@ -99,8 +99,8 @@ let isProcessing = false; // Variável para evitar requisições paralelas
 
 const ytVideoAduioDownload = async (req, res, next) => {
   const { urlVideo, qualityFormat, clientId } = req.body
-  console.log(urlVideo)
-  console.log(qualityFormat, "qualityFormat")
+  console.log(urlVideo, "urlVideo", qualityFormat, "qualityFormat")
+  const resolutionVideo = qualityFormat.match(/\d+/)[0];  // Obtém apenas os números
 
   if (isProcessing) {
     return res.status(429).json({
@@ -108,30 +108,22 @@ const ytVideoAduioDownload = async (req, res, next) => {
     });
   }
 
-  // if (!urlVideo || !ytdl.validateURL(urlVideo)) {
-  //   return res.status(400).json({ error: "URL de vídeo inválida ou não fornecida." });
-  // }
-
   try {
-    // const info = await ytdl.getInfo(urlVideo);
+    const info = await youtubedl(urlVideo, { dumpJson: true });
 
-    // // Obtém os formatos de vídeo e áudio disponíveis
-    // const videoFormats = ytdl.filterFormats(info.formats, "video");
-    // const audioFormats = ytdl.filterFormats(info.formats, "audioonly");
+    // Busque o formato com a resolução desejada
+    const selectedFormat = info.formats.find(format => {
+      // Pegue a altura da resolução (parte após 'x')
+      const resolutionHeight = format.resolution?.split('x')[1];
+      return resolutionHeight === resolutionVideo && format.vcodec !== 'none';
+    });
 
-    // if (videoFormats.length === 0 || audioFormats.length === 0) {
-    //   return res.status(404).json({ error: "Nenhum formato de vídeo ou áudio disponível." });
-    // }
+    if (!selectedFormat) {
+      console.log("Formato não encontrado.");
+    }
 
-    // const specificVideoFormat = videoFormats.find(
-    //   (format) => format.qualityLabel === qualityFormat) || ytdl.chooseFormat(videoFormats, { quality: "highestvideo" });
-
-    // const bestAudioFormat = audioFormats[0];
-
-    // const tempDir = path.resolve(__dirname, 'downloads'); // Diretório temporário
-    // if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
-    // const videoPath = path.resolve(tempDir, `video_${Date.now()}.mp4`);
-    // const audioPath = path.resolve(tempDir, `audio_${Date.now()}.mp3`);
+    // Escolher o ID do formato (resolutionVideo ou 397 = 480p)
+    const formatId = selectedFormat ? selectedFormat.format_id : '397';
 
     // Diretório temporário
     const tempDir = path.resolve(path.resolve(), 'src/downloads');
@@ -152,8 +144,8 @@ const ytVideoAduioDownload = async (req, res, next) => {
 
     await youtubedl(urlVideo, {
       output: videoPath,
-      format: 'bestvideo+bestaudio/best',
-      mergeOutputFormat: 'mp4',
+      format: formatId,
+      // mergeOutputFormat: 'mp4',
     }).then(() => {
       console.log("Vídeo baixado com sucesso:", videoPath);
     }).catch(err => {
@@ -162,26 +154,8 @@ const ytVideoAduioDownload = async (req, res, next) => {
       throw err;
     });
 
-    // Função para baixar arquivos
-    // const downloadFile = (url, format, outputPath) =>
-    //   new Promise((resolve, reject) => {
-    //     const stream = ytdl(url, { format });
-    //     const writeStream = fs.createWriteStream(outputPath);
-    //     stream.pipe(writeStream);
-    //     stream.on("end", resolve);
-    //     stream.on("error", reject);
-    //     writeStream.on("error", reject);
-    //   });
-
     isProcessing = true;
 
-    // Aguarda os downloads de vídeo e áudio  
-    // console.time("downloads de vídeo");
-    // await downloadFile(urlVideo, specificVideoFormat, videoPath);
-    // console.timeEnd("downloads de vídeo");
-    // console.time("downloads de audio");
-    // await downloadFile(urlVideo, bestAudioFormat, audioPath);
-    // console.timeEnd("downloads de audio");
 
     req.videoPath = videoPath;  // Armazenando o caminho do vídeo no req
     req.audioPath = audioPath;  // Armazenando o caminho do áudio no req
