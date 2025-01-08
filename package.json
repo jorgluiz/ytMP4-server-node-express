@@ -18,7 +18,7 @@
     "socket.io": "^4.8.1",
     "stream": "^0.0.3",
     "uuid": "^11.0.3",
-    "youtube-dl-exec": "^3.0.12",
+    "youtube-dl-exec": "3.0.10",
     "ytdl-core": "^4.11.5"
   }
 }
