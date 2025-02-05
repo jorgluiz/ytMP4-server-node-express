@@ -9,8 +9,6 @@ const ffmpeg = require("fluent-ffmpeg");
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const { v4: uuidv4 } = require("uuid"); // Para gerar identificadores únicos
-const { PassThrough } = require('stream');
 require('dotenv').config();
 
 const server = http.createServer(app);
@@ -19,22 +17,22 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server, {
   cors: {
-    origin: ['https://ytmp4-server-node-express-production.up.railway.app', 'http://localhost:8080', 'https://web-production-9f85.up.railway.app/'], // Permite qualquer origem (ajuste conforme necessário)
+    origin: ['https://ytmp4-frontend.up.railway.app/'], // Permite qualquer origem (ajuste conforme necessário)
     methods: ['GET', 'POST']
   }
 });
 
 // Configura o CORS para aceitar requisições de uma origem específica
 app.use(cors({
-  origin: ['https://web-production-9f85.up.railway.app', 'http://localhost:8080'],
+  origin: ['https://ytmp4-frontend.up.railway.app/'],
   methods: ['GET', 'POST']
 }));
 
 
 // Defina o caminho para o binário do ffmpeg
 const ffmpegPath = process.env.FFMPEG_PATH || '/usr/bin/ffmpeg';
-ffmpeg.setFfmpegPath(ffmpegPath);
-// ffmpeg.setFfmpegPath(path.resolve("C:\\Users\\Dev\\Desktop\\ffmpeg-master-latest-win64-gpl-shared\\bin\\ffmpeg.exe"));
+// ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfmpegPath(path.resolve("C:\\Users\\Dev\\Desktop\\ffmpeg-master-latest-win64-gpl-shared\\bin\\ffmpeg.exe"));
 
 app.post("/yt-video-formats", async (req, res) => {
   console.time("yt-video-formats"); // Inicia o cronômetro
@@ -53,8 +51,8 @@ app.post("/yt-video-formats", async (req, res) => {
     let videoTitle = info.videoDetails.title;
     const sanitizedTitle = videoTitle.replace(/[^a-zA-Z0-9\s]/g, '');
 
-    // Obtém a URL da capa do vídeo (thumbnail)
-    const thumbnailUrl = info.videoDetails.thumbnails.pop().url; // Pega a melhor qualidade disponível
+    // Obtém capa do vídeo (thumbnail)
+    const thumbnailUrl = info.videoDetails.thumbnails.pop().url;
 
     // Obtém os formatos de vídeo e áudio disponíveis
     const videoFormats = ytdl.filterFormats(info.formats, "video");
@@ -129,7 +127,7 @@ const ytVideoAduioDownload = async (req, res, next) => {
     const tempDir = path.resolve(path.resolve(), 'src/downloads');
     if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
     const audioPath = path.resolve(tempDir, 'audio.mp3');
-    const videoPath = path.resolve(tempDir, 'video.f399.mp4');
+    const videoPath = path.resolve(tempDir, 'video.mp4');
 
     await youtubedl(urlVideo, {
       output: audioPath,
