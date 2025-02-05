@@ -13,7 +13,7 @@ require('dotenv').config();
 
 // Configura o CORS para aceitar requisições de uma origem específica
 app.use(cors({
-  origin: ['https://ytmp4-frontend.up.railway.app/', 'https://ytmp4-server-node-express-production.up.railway.app/'],
+  origin: ['https://ytmp4-frontend.up.railway.app/', 'https://ytmp4-server-node-express-production.up.railway.app'],
   methods: ['GET', 'POST']
 }));
 
@@ -24,15 +24,15 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server, {
   cors: {
-    origin: ['https://ytmp4-frontend.up.railway.app/', 'https://ytmp4-server-node-express-production.up.railway.app/'], // Permite qualquer origem (ajuste conforme necessário)
+    origin: ['https://ytmp4-frontend.up.railway.app/', 'https://ytmp4-server-node-express-production.up.railway.app'], // Permite qualquer origem (ajuste conforme necessário)
     methods: ['GET', 'POST']
   }
 });
 
 // Defina o caminho para o binário do ffmpeg
 const ffmpegPath = process.env.FFMPEG_PATH || '/usr/bin/ffmpeg';
-// ffmpeg.setFfmpegPath(ffmpegPath);
-ffmpeg.setFfmpegPath(path.resolve("C:\\Users\\Dev\\Desktop\\ffmpeg-master-latest-win64-gpl-shared\\bin\\ffmpeg.exe"));
+ffmpeg.setFfmpegPath(ffmpegPath);
+// ffmpeg.setFfmpegPath(path.resolve("C:\\Users\\Dev\\Desktop\\ffmpeg-master-latest-win64-gpl-shared\\bin\\ffmpeg.exe"));
 
 app.post("/yt-video-formats", async (req, res) => {
   console.time("yt-video-formats"); // Inicia o cronômetro
