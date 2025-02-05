@@ -13,7 +13,7 @@ require('dotenv').config();
 
 // Configura o CORS para aceitar requisições de uma origem específica
 app.use(cors({
-  origin: ['https://ytmp4-frontend.up.railway.app/', 'https://ytmp4-server-node-express-production.up.railway.app'],
+  origin: ['https://ytmp4-server-node-express-production.up.railway.app', 'https://ytmp4-frontend.up.railway.app'],
   methods: ['GET', 'POST']
 }));
 
@@ -24,7 +24,7 @@ const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server, {
   cors: {
-    origin: ['https://ytmp4-frontend.up.railway.app/', 'https://ytmp4-server-node-express-production.up.railway.app'], // Permite qualquer origem (ajuste conforme necessário)
+    origin: ['https://ytmp4-server-node-express-production.up.railway.app', 'https://ytmp4-frontend.up.railway.app'], // Permite qualquer origem (ajuste conforme necessário)
     methods: ['GET', 'POST']
   }
 });
